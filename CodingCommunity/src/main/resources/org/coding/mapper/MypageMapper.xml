@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.coding.mapper.MypageMapper">
+
+	<!-- 내가쓴 글만 출력 -->
+	<select id="mypage" resultType="org.coding.model.MypageVO">
+	
+		select * from board
+		where id = #{id}
+		order by regdate desc
+		
+	</select>
+	
+	<!-- 개인정보 수정 -->
+	<update id="mywrite">
+	
+		update member 
+		set name=#{name}, password=#{password}, email= #{email}
+		where id = #{id};
+		
+	</update>
+	
+
+	<update id="pwrite">
+		
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			select id from member
+		</selectKey>
+		
+		update member 
+		set uuid=#{uuid}, uploadPath=#{uploadPath}, fileName=#{fileName}
+		where id = #{id};
+		
+	</update>
+	
+	<select id="mywrite2" resultType="org.coding.model.MywriteListVO">
+		select *
+		from(
+			select @rownum:=@rownum+1 rownum, b.* 
+    		from board b, (select @rownum:=0) as tmp    
+    	 	
+    			where id = #{id}
+       		
+    		order by bno desc
+		) as boardlist
+		
+		<![CDATA[
+		where rownum > (#{pageNum}-1)*#{amount} and rownum <= #{pageNum}*#{amount}
+		]]>
+	</select>
+	
+	<select id="total2" resultType="int">
+  		select count(*) from board where id=#{id}
+   	</select>
+  
+	<select id="member" resultType="org.coding.model.MemberVo">
+			select * from member where id=#{id}
+	</select>
+	
+	
+	
+	
+ 	<select id="myreply" resultType="org.coding.model.MyreplyListVO">
+		select *
+		from(
+			select @rownum:=@rownum+1 rownum, b.* 
+    		from reply b, (select @rownum:=0) as tmp    
+    	 	
+    			where id = #{id}
+       		
+    		order by bno desc
+		) as reply
+		
+		<![CDATA[
+		where rownum > (#{pageNum}-1)*#{amount} and rownum <= #{pageNum}*#{amount}
+		]]>
+	</select>
+	
+	<select id="retotal2" resultType="int">
+  		select count(*) from reply where id=#{id}
+   	</select>
+	
+</mapper>
